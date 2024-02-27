@@ -1,13 +1,21 @@
 import uuid
 
-from sqlalchemy import Column, String
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import backref
 
 from app import db
 
 class Team(db.Model):
     __tablename__ = 'teams'
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    name = Column(db.String(100), nullable=False)
-    players = relationship('Player', secondary='player_team_status', back_populates='teams')
+    id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    name = db.Column(db.String(100), nullable=False)
+
+    player_statuses = db.relationship("PlayerTeamStatus", back_populates="team")
+    matches_as_team_one = db.relationship('Match',
+                                          foreign_keys='[Match.team_one_id]',
+                                          back_populates='team_one',
+                                          lazy='dynamic')
+    matches_as_team_two = db.relationship('Match',
+                                          foreign_keys='[Match.team_two_id]',
+                                          back_populates='team_two',
+                                          lazy='dynamic')

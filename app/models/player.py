@@ -8,8 +8,8 @@ from app import db
 
 class Player(db.Model):
     __tablename__ = 'players'
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    name = Column(db.String(100), nullable=False)
-    teams = db.relationship('Team', secondary='player_team_status', back_populates='players')
+    id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    name = db.Column(db.String(100), nullable=False)
 
-
+    team_statuses = relationship("PlayerTeamStatus", back_populates="player")
+    player_data = db.relationship('PlayerData', back_populates='player')

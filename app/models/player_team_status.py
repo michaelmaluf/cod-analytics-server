@@ -8,5 +8,5 @@ class PlayerTeamStatus(db.Model):
     team_id = db.Column(UUID(as_uuid=True), db.ForeignKey('teams.id'), primary_key=True)
     active = db.Column(db.Boolean, default=True)
 
-    player = db.relationship('Player', back_populates='teams')
-    team = db.relationship('Team', back_populates='players')
+    player = db.relationship('Player', back_populates='team_statuses')
+    team = db.relationship('Team', back_populates='player_statuses')
