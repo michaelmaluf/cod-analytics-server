@@ -14,5 +14,5 @@ class MatchMap(db.Model):
     team_two_score = db.Column(db.Integer, nullable=False)
 
     match = db.relationship('Match', back_populates='match_maps')
-    map = db.relationship('Map', back_populates='match_maps')
+    map_game_mode_pair = db.relationship('MapGameModePair', back_populates='match_maps')
     player_data = db.relationship('PlayerData', back_populates='match_map')

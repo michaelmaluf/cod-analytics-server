@@ -9,6 +9,5 @@ class Map(db.Model):
     __tablename__ = 'maps'
     id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     name = db.Column(db.String(100), nullable=False)
-    game_mode = db.Column(db.Enum(GameMode), nullable=False)
 
-    match_maps = db.relationship("MatchMap", back_populates='map')
+    map_game_mode_pairs = db.relationship("MapGameModePair", back_populates='map')
