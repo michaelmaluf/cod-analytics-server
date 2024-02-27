@@ -9,6 +9,9 @@ class PlayerData(db.Model):
     kills = db.Column(db.Integer, nullable=False)
     deaths = db.Column(db.Integer, nullable=False)
     damage = db.Column(db.Integer, nullable=False)
+    hill_time = db.Column(db.Integer)
+    first_bloods = db.Column(db.Integer)
+    captures = db.Column(db.Integer)
 
     match_map = db.relationship('MatchMap', back_populates='player_data')
     player = db.relationship('Player', back_populates='player_data')
