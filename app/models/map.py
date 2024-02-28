@@ -3,7 +3,6 @@ import uuid
 from sqlalchemy.dialects.postgresql import UUID
 
 from app import db
-from app.enums import GameMode
 
 class Map(db.Model):
     __tablename__ = 'maps'
