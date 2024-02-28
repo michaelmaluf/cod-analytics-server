@@ -51,5 +51,5 @@ class ChromeDriver:
         return self.driver.page_source
 
     def exit_driver(self):
-        self.driver.close()
+        self.driver.quit()
         _driver = None

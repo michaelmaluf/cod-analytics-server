@@ -148,3 +148,6 @@ def fetch_match_and_player_data():
     for match_url in match_urls:
         match_and_player_data.append(parse_match_data(match_url))
 
+    chrome_driver.exit_driver()
+    return match_and_player_data
+
