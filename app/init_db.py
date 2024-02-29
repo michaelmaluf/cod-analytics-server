@@ -1,9 +1,9 @@
-from app.models.game_mode import GameMode
+from app.models.map_game_mode import GameMode
 from app.enums import GameModeType
 from app import db
 
 def prepopulate_db():
-    if not GameMode.query.first():
+    if not db.session.query(GameMode).first():
 
         for game_mode in GameModeType:
             game_mode_entry = GameMode(name=game_mode)
