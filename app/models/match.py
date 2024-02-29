@@ -13,8 +13,9 @@ class Match(db.Model):
     team_one_maps_won = db.Column(db.Integer, nullable=False)
     team_two_id = db.Column(UUID(as_uuid=True), db.ForeignKey('teams.id'), nullable=False)
     team_two_maps_won = db.Column(db.Integer, nullable=False)
-    date = db.Column(db.DateTime, nullable=False)
+    date = db.Column(db.Date, nullable=False)
     stage = db.Column(db.Enum(Stage), nullable=False)
+    lan = db.Column(db.Boolean, nullable=False)
 
     team_one = db.relationship('Team', back_populates='matches_as_team_one', foreign_keys=[team_one_id])
     team_two = db.relationship('Team', back_populates='matches_as_team_two', foreign_keys=[team_two_id])
