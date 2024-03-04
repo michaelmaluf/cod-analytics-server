@@ -22,7 +22,7 @@ def create_app():
 
     with app.app_context():
         register_models()
-        db.drop_all()
+        # db.drop_all()
         db.create_all()
 
     from app.api import scraper_bp

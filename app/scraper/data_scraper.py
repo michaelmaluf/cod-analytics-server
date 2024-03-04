@@ -22,38 +22,39 @@ def get_most_recent_match_date():
     return most_recent_match_date
 
 
-def get_match_dates_until_present():
-    last_match_date = get_most_recent_match_date()
-    last_match_date_month = int(last_match_date.strftime('%Y-%m-%d').split('-')[1])
-    current_date = datetime.now().date()
-    current_month = int(current_date.strftime('%Y-%m-%d').split('-')[1])
-    year = const.CDL_YEAR
+# DEPRECATED: Both functions below are deprecated, no longer using match dates to query match urls
+# def get_match_dates_until_present():
+#     last_match_date = get_most_recent_match_date()
+#     last_match_date_month = int(last_match_date.strftime('%Y-%m-%d').split('-')[1])
+#     current_date = datetime.now().date()
+#     current_month = int(current_date.strftime('%Y-%m-%d').split('-')[1])
+#     year = const.CDL_YEAR
+#
+#     if last_match_date_month <= current_month:
+#         year_month_pairs = [(year, month) for month in range(last_match_date_month, current_month + 1)]
+#     else:
+#         range1 = [(year, month) for month in range(last_match_date_month, 13)]
+#         range2 = [(year + 1, month) for month in range(1, current_month + 1)]
+#         year_month_pairs = [*range1, *range2]
+#
+#     days_of_week = [3, 4, 5, 6]
+#     match_dates = []
+#     cal = Calendar()
+#
+#     for year, month in year_month_pairs:
+#         for day in cal.itermonthdays(year, month):
+#             if day == 0:
+#                 continue
+#             potential_date = date(year, month, day)
+#             if potential_date.weekday() in days_of_week and last_match_date < potential_date <= current_date:
+#                 match_dates.append(potential_date)
+#
+#     return match_dates
 
-    if last_match_date_month <= current_month:
-        year_month_pairs = [(year, month) for month in range(last_match_date_month, current_month + 1)]
-    else:
-        range1 = [(year, month) for month in range(last_match_date_month, 13)]
-        range2 = [(year + 1, month) for month in range(1, current_month + 1)]
-        year_month_pairs = [*range1, *range2]
 
-    days_of_week = [3, 4, 5, 6]
-    match_dates = []
-    cal = Calendar()
-
-    for year, month in year_month_pairs:
-        for day in cal.itermonthdays(year, month):
-            if day == 0:
-                continue
-            potential_date = date(year, month, day)
-            if potential_date.weekday() in days_of_week and last_match_date < potential_date <= current_date:
-                match_dates.append(potential_date)
-
-    return match_dates
-
-
-def get_urls_by_match_dates():
-    match_dates_to_fetch = get_match_dates_until_present()
-    return [const.BREAKING_POINT_DATE_URL + match_date.strftime('%Y-%m-%d') for match_date in match_dates_to_fetch]
+# def get_urls_by_match_dates():
+#     match_dates_to_fetch = get_match_dates_until_present()
+#     return [const.BREAKING_POINT_DATE_URL + match_date.strftime('%Y-%m-%d') for match_date in match_dates_to_fetch]
 
 
 def parse_match_metadata(match_metadata_div):
@@ -62,7 +63,6 @@ def parse_match_metadata(match_metadata_div):
         'stage': ' '.join(metadata_element[1:3]),
         'lan': True if metadata_element[-1] != 'Qualifier' else False,
     }
-
 
 
 def parse_match_overview(match_overview_div):
@@ -149,8 +149,8 @@ def parse_match_data(match_url):
 
 
 def fetch_match_and_player_data():
-    match_date_urls = get_urls_by_match_dates()
-    match_urls = chrome_driver.fetch_match_urls_from_match_dates(match_date_urls)
+    last_match_date = get_most_recent_match_date()
+    match_urls = chrome_driver.fetch_match_urls_from_last_match_date(last_match_date)
     match_and_player_data = []
 
     for match_url in match_urls:
@@ -158,4 +158,3 @@ def fetch_match_and_player_data():
 
     chrome_driver.exit_driver()
     return match_and_player_data
-
