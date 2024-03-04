@@ -38,6 +38,14 @@ class RosterService:
         return new_player
 
     def create_player_team_status(self, team, player):
+        # sets active flag to false for previous player_team statuses (necessary logic to facilitate a player changing teams)
+        previous_player_team_statuses = self.session.query(PlayerTeamStatus).filter_by(player=player)
+        for previous_player_team_status in previous_player_team_statuses:
+            if previous_player_team_status.active:
+                previous_player_team_status.active = False
+                self.session.add(previous_player_team_status)
+
+
         player_team_status = PlayerTeamStatus(team=team, player=player)
         self.session.add(player_team_status)
         self.session.commit()
@@ -57,6 +65,3 @@ class RosterService:
         player = self.find_player_by_name(player_name)
         player_team_status = self.find_player_team_status(team, player)
         return player
-
-        ## add logic later to toggle flag off when a player is no longer on a team!
-        ## via an if statement if the player already exists but the player team status does not... prob means that a player has switched teams
