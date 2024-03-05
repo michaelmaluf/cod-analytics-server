@@ -1,8 +1,8 @@
-from app.models.match import Match
+from database.models import Match
 from app.schemas import MatchSchema
-from app.models.match_map import MatchMap
-from app.models.player_data import PlayerData
-from app.enums import GameModeType, type_to_objective_key
+from database.models.match_map import MatchMap
+from database.models import PlayerData
+from app.enums import type_to_objective_key
 
 
 class MatchService:

@@ -1,12 +1,11 @@
 import os
 
 from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
 
 from app.config import DevConfig, ProdConfig
-from app.models import register_models
-
-db = SQLAlchemy()
+from database import db
+# from database.models import register_models
+from database.models import *
 
 env_config = {
     'development': DevConfig,
@@ -21,7 +20,7 @@ def create_app():
     db.init_app(app)
 
     with app.app_context():
-        register_models()
+        # register_models()
         # db.drop_all()
         db.create_all()
 

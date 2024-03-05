@@ -1,5 +1,5 @@
 from app.errors import GameModeNotFoundError
-from app.models.map_game_mode import Map, GameMode, MapGameModePair
+from database.models import Map, GameMode, MapGameModePair
 from app.enums import string_to_game_mode_type
 
 

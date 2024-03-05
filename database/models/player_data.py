@@ -1,6 +1,6 @@
 from sqlalchemy.dialects.postgresql import UUID
 
-from app import db
+from database import db
 
 class PlayerData(db.Model):
     __tablename__ = 'player_data'

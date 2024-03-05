@@ -2,7 +2,7 @@ import uuid
 
 from sqlalchemy.dialects.postgresql import UUID
 
-from app import db
+from database import db
 
 class MatchMap(db.Model):
     __tablename__ = 'match_maps'

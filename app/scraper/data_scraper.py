@@ -1,14 +1,11 @@
-import os
-from datetime import date, datetime
-from calendar import Calendar
+from datetime import datetime
 
 from .chrome_driver import ChromeDriver
 from app import db
-from app.models.match import Match
+from database.models import Match
 import app.const as const
 
 from bs4 import BeautifulSoup
-import requests
 
 chrome_driver = ChromeDriver()
 
