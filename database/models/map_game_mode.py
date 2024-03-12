@@ -29,3 +29,4 @@ class GameMode(db.Model):
     name = db.Column(db.Enum(GameModeType), nullable=False)
 
     map_game_mode_pairs = db.relationship("MapGameModePair", back_populates='game_mode')
+    ml_models = db.relationship("MLModel", back_populates='game_mode')

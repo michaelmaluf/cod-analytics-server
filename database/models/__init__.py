@@ -16,3 +16,4 @@ from .map_game_mode import Map, GameMode, MapGameModePair
 from .match import Match
 from .match_map import MatchMap
 from .player_data import PlayerData
+from .ml_model import MLModel
