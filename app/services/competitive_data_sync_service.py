@@ -34,3 +34,4 @@ class CompetitiveDataSyncService:
                 match.match_maps.append(match_map)
 
             self.session.commit()
+            self.session.close()

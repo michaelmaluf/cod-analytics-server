@@ -75,11 +75,11 @@ class ChromeDriver:
 
         for match_date_div in match_date_divs:
             match_date = match_date_div.find_element(By.CSS_SELECTOR, 'div.mantine-195cjfh').text
-            match_date_object = datetime.strptime(match_date.split(' - ')[1], "%B %d, %Y").date()
+            match_date_object = datetime.strptime(match_date.split(' - ')[1], "%B %d, %Y")
 
             # scrape matches from last match date until present
             # once we are up to date with the last match, exit loop
-            if match_date_object <= last_match_date:
+            if match_date_object.date() <= last_match_date.date():
                 break
 
             match_divs = match_date_div.find_elements(By.CLASS_NAME, 'mantine-vdx6qn')

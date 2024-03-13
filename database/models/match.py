@@ -13,7 +13,7 @@ class Match(db.Model):
     team_one_maps_won = db.Column(db.Integer, nullable=False)
     team_two_id = db.Column(UUID(as_uuid=True), db.ForeignKey('teams.id'), nullable=False)
     team_two_maps_won = db.Column(db.Integer, nullable=False)
-    date = db.Column(db.Date, nullable=False)
+    date = db.Column(db.DateTime(timezone=True), nullable=False)
     stage = db.Column(db.Enum(Stage), nullable=False)
     lan = db.Column(db.Boolean, nullable=False)
 

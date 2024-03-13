@@ -129,7 +129,7 @@ def parse_match_data(match_url):
     match_page_source = chrome_driver.fetch_match_page_source(match_url)
     soup = BeautifulSoup(match_page_source, 'html.parser')
 
-    match_date = soup.find('div', class_='mantine-7c77qh').text.split(',')[0]
+    match_date = soup.find('div', class_='mantine-7c77qh').text
     match_metadata_div = soup.find('div', class_='mantine-l3a1ir')
     match_overview_div = soup.find('div', class_='mantine-1a5yjft')
     match_maps_overview_div = soup.find('div', class_='mantine-g92whd')
