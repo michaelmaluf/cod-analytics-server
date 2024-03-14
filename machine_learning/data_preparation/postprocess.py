@@ -19,7 +19,7 @@ def scale_predictions(predictions, target_score):
 def custom_model_evaluation(y_true, y_pred, target_score, winner_weight=0.7, score_weight=0.3):
     # Determine winners based on a score of 250, 1 if team_one wins, 0 if team_two wins
     winner_true = (y_true['team_one_score'] > y_true['team_two_score']).astype(int)
-    winner_pred = (y_true['team_one_score'] > y_true['team_two_score']).astype(int)
+    winner_pred = (y_pred['team_one_score'] > y_pred['team_two_score']).astype(int)
 
     # Calculate winner accuracy
     correct_winner = (winner_true == winner_pred).astype(int)
