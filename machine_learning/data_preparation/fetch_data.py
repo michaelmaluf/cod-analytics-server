@@ -5,6 +5,7 @@ load_dotenv()
 import copy
 
 import pandas as pd
+from sqlalchemy import or_
 
 from database.models import Match
 from app.enums import GameModeType
@@ -69,3 +70,18 @@ def fetch_data(game_mode, db_session):
     return df_for_game_mode
 
 
+def fetch_data_for_predictions(game_mode, db_session, team_one_id, team_two_id):
+    matches = db_session.query(Match).filter(
+        or_(
+            Match.team_one_id == team_one_id,
+            Match.team_two_id == team_one_id,
+            Match.team_one_id == team_two_id,
+            Match.team_two_id == team_two_id
+        )
+    ).all()
+    match_data_dicts = []
+    for match in matches:
+        match_data = fetch_match_data_from_match(game_mode, match)
+        match_data_dicts.extend(match_data)
+    df_for_game_mode = pd.DataFrame(match_data_dicts)
+    return df_for_game_mode

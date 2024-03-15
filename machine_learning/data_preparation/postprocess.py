@@ -12,7 +12,7 @@ def scale_predictions(predictions, target_score):
         losing_index = 1 - winning_index
         multiplier = target_score / adjusted_predictions[i, winning_index]
         adjusted_predictions[i, winning_index] = target_score
-        adjusted_predictions[i, losing_index] = adjusted_predictions[i, losing_index] * multiplier
+        adjusted_predictions[i, losing_index] = round(adjusted_predictions[i, losing_index] * multiplier)
     return adjusted_predictions
 
 

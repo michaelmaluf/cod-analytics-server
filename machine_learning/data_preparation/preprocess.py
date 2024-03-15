@@ -10,7 +10,7 @@ def separate_features_and_labels(df):
 
 
 def drop_columns(df):
-    columns_to_drop = []
+    columns_to_drop = ['map_number']
 
     for team in ['team_one', 'team_two']:
         # columns_to_drop.append(team)
