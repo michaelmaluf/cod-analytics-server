@@ -1,1 +1,2 @@
 from .match_schema import MatchSchema
+from .prediction_schema import PredictionRequestSchema, PredictionResponseSchema
