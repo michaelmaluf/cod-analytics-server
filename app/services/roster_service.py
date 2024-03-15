@@ -65,3 +65,9 @@ class RosterService:
         player = self.find_player_by_name(player_name)
         player_team_status = self.find_player_team_status(team, player)
         return player
+
+    def find_team_by_team_name(self, team_name):
+        return self.session.query(Team).filter_by(name=team_name).first()
+
+    def find_active_players_on_team(self, team):
+        return self.session.query(PlayerTeamStatus).filter_by(team=team, active=True).all()

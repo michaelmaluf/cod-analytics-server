@@ -14,10 +14,10 @@ class MapGameModeService:
         return map_mode_pair
 
     def find_map_by_name(self, map_name):
-        team = self.session.query(Map).filter_by(name=map_name).first()
-        if not team:
+        map = self.session.query(Map).filter_by(name=map_name).first()
+        if not map:
             return self.create_map(map_name)
-        return team
+        return map
 
     def find_mode_by_name(self, mode_name):
         try:
