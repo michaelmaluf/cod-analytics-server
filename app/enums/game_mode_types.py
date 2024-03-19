@@ -6,16 +6,17 @@ class GameModeType(Enum):
     SEARCH_AND_DESTROY = 'Search & Destroy'
     CONTROL = 'Control'
 
-def string_to_game_mode_type(input_string):
-    for game_mode in GameModeType:
-        if game_mode.value == input_string:
-            return game_mode
-    raise GameModeNotFoundError(input_string)
+    @classmethod
+    def get_mode_by_value(cls, value):
+        for mode in cls:
+            if mode.value == value:
+                return mode
+        return None
 
-def type_to_objective_key(game_mode_type):
-    if game_mode_type.name == GameModeType.HARDPOINT:
-        return 'hill_time'
-    elif game_mode_type.name == GameModeType.SEARCH_AND_DESTROY:
-        return 'first_bloods'
-    else:
-        return 'captures'
+    def to_objective_key(game_mode_type):
+        if game_mode_type.name == GameModeType.HARDPOINT:
+            return 'hill_time'
+        elif game_mode_type.name == GameModeType.SEARCH_AND_DESTROY:
+            return 'first_bloods'
+        else:
+            return 'captures'

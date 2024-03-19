@@ -2,7 +2,6 @@ from database.models import Match
 from app.schemas import MatchSchema
 from database.models.match_map import MatchMap
 from database.models import PlayerData
-from app.enums import type_to_objective_key
 
 
 class MatchService:
@@ -28,7 +27,7 @@ class MatchService:
         return match_map
 
     def create_player_data(self, player, raw_player_data, map_game_mode_pair):
-        objective_key = type_to_objective_key(map_game_mode_pair.game_mode)
+        objective_key = map_game_mode_pair.game_mode.to_objective_key()
 
         player_data_kwargs = {
             'player': player,

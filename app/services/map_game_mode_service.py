@@ -1,6 +1,6 @@
 from app.errors import GameModeNotFoundError
 from database.models import Map, GameMode, MapGameModePair
-from app.enums import string_to_game_mode_type
+from app.enums import GameModeType
 
 
 class MapGameModeService:
@@ -21,7 +21,7 @@ class MapGameModeService:
 
     def find_mode_by_name(self, mode_name):
         try:
-            game_mode_type = string_to_game_mode_type(mode_name)
+            game_mode_type = GameModeType.get_mode_by_value(mode_name)
             mode = self.session.query(GameMode).filter_by(name=game_mode_type).first()
             if not mode:
                 return self.create_mode(game_mode_type)

@@ -21,8 +21,8 @@ class PredictionService:
         self.MapGameModeService = MapGameModeService(session)
 
     def get_map_predictions(self, prediction_request):
-        game_mode = GameModeType[prediction_request['game_mode'].upper()]
-        prediction_df = self.compute_prediction_df(game_mode, prediction_request)
+        game_mode = GameModeType.get_mode_by_value(prediction_request['game_mode'])
+        prediction_df, prediction_response = self.compute_prediction_df(game_mode, prediction_request)
 
         if game_mode == GameModeType.HARDPOINT:
             predictions = self.ModelService.HardpointModel.predict(prediction_df)
@@ -34,18 +34,22 @@ class PredictionService:
             predictions = self.ModelService.ControlModel.predict(prediction_df)
             scaled_predictions = scale_predictions(predictions, const.CONTROL_TARGET_SCORE)
 
-        return scaled_predictions
+        prediction_response['team_one_prediction'] = scaled_predictions[0, 0]
+        prediction_response['team_two_prediction'] = scaled_predictions[0, 1]
+
+        return prediction_response
 
     def compute_prediction_df(self, game_mode, prediction_request):
         map_id = self.MapGameModeService.find_map_by_name(prediction_request['map']).id
+        team_and_player_data, player_data_to_return = self.get_teams_and_player_data(game_mode, map_id, prediction_request)
 
         prediction_dict = {
             'stage': self.compute_current_stage(),
             'map_id': map_id,
-            **self.get_teams_and_player_data(game_mode, map_id, prediction_request),
+            **team_and_player_data,
         }
 
-        return pd.DataFrame(prediction_dict, index=[0])
+        return pd.DataFrame(prediction_dict, index=[0]), player_data_to_return
 
 
     def get_teams_and_player_data(self, game_mode, map_id, prediction_request):
@@ -61,8 +65,10 @@ class PredictionService:
         team_one_averages = self.compute_team_averages('team_one', map_id, team_df, team_one.id)
         team_two_averages = self.compute_team_averages('team_two', map_id, team_df, team_two.id)
 
-        team_one_player_averages = self.compute_player_averages('team_one', map_id, player_df, team_one_players)
-        team_two_player_averages = self.compute_player_averages('team_two', map_id, player_df, team_two_players)
+        team_one_player_averages, team_one_player_averages_to_return = \
+            self.compute_player_averages('team_one', map_id, player_df, team_one_players)
+        team_two_player_averages, team_two_player_averages_to_return = \
+            self.compute_player_averages('team_two', map_id, player_df, team_two_players)
 
         team_and_player_data = {
             'team_one': team_one.id,
@@ -73,7 +79,12 @@ class PredictionService:
             **team_two_player_averages
         }
 
-        return team_and_player_data
+        player_averages_to_return = {
+            'team_one_player_predictions': team_one_player_averages_to_return,
+            'team_two_player_predictions': team_two_player_averages_to_return,
+        }
+
+        return team_and_player_data, player_averages_to_return
 
     def compute_team_averages(self, team_number, map_id, team_df, team_id):
         team_averages = {}
@@ -90,6 +101,7 @@ class PredictionService:
 
     def compute_player_averages(self, team_number, map_id, player_df, players):
         player_averages = {}
+        player_averages_to_return = {}
         player_numbers = ['player_one', 'player_two', 'player_three', 'player_four']
 
         # Group by 'player_id' for overall averages
@@ -99,13 +111,20 @@ class PredictionService:
         map_specific_averages = player_df[player_df['map_id'] == map_id].groupby('player_id')[
             ['kills', 'deaths', 'damage', 'objectives']].mean()
 
-        for player, player_number in zip(players, player_numbers):
-            player_id = player.player_id
+        for player_status, player_number in zip(players, player_numbers):
+            player_id = player_status.player_id
+            player_name = player_status.player.name
+
+            avg_game_mode_kills = overall_averages.at[player_id, 'kills']
+            avg_game_mode_deaths = overall_averages.at[player_id, 'deaths']
+            avg_game_mode_damage = overall_averages.at[player_id, 'damage']
+            avg_game_mode_objectives = overall_averages.at[player_id, 'objectives']
+
             player_avg = {
-                f'avg_game_mode_kills_{team_number}_{player_number}': overall_averages.at[player_id, 'kills'],
-                f'avg_game_mode_deaths_{team_number}_{player_number}': overall_averages.at[player_id, 'deaths'],
-                f'avg_game_mode_damage_{team_number}_{player_number}': overall_averages.at[player_id, 'damage'],
-                f'avg_game_mode_objectives_{team_number}_{player_number}': overall_averages.at[player_id, 'objectives'],
+                f'avg_game_mode_kills_{team_number}_{player_number}': avg_game_mode_kills,
+                f'avg_game_mode_deaths_{team_number}_{player_number}': avg_game_mode_deaths,
+                f'avg_game_mode_damage_{team_number}_{player_number}': avg_game_mode_damage,
+                f'avg_game_mode_objectives_{team_number}_{player_number}': avg_game_mode_objectives,
                 f'avg_map_game_mode_kills_{team_number}_{player_number}': map_specific_averages.at[
                     player_id, 'kills'] if player_id in map_specific_averages.index else None,
                 f'avg_map_game_mode_deaths_{team_number}_{player_number}': map_specific_averages.at[
@@ -116,9 +135,17 @@ class PredictionService:
                     player_id, 'objectives'] if player_id in map_specific_averages.index else None,
             }
 
-            player_averages.update(player_avg)
+            player_avg_to_return = {
+                'kills': round(avg_game_mode_kills),
+                'deaths': round(avg_game_mode_deaths),
+                'damage': round(avg_game_mode_damage),
+                'objectives': round(avg_game_mode_objectives),
+            }
 
-        return player_averages
+            player_averages.update(player_avg)
+            player_averages_to_return[player_name] = player_avg_to_return
+
+        return player_averages, player_averages_to_return
 
 
     def compute_current_stage(self):
