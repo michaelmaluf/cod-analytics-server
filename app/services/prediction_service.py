@@ -86,10 +86,10 @@ class PredictionService:
         prediction_response = {
             'team_one_player_predictions': team_one_player_averages_to_return,
             'team_two_player_predictions': team_two_player_averages_to_return,
-            'team_one_average_score': round(team_one_averages['avg_game_mode_score_team_one']),
-            'team_two_average_score': round(team_two_averages['avg_game_mode_score_team_two']),
-            'team_one_average_score_against': round(team_one_averages['avg_game_mode_score_team_one_against']),
-            'team_two_average_score_against': round(team_two_averages['avg_game_mode_score_team_two_against']),
+            'team_one_average_score': round(team_one_averages['avg_game_mode_score_team_one'], 1),
+            'team_two_average_score': round(team_two_averages['avg_game_mode_score_team_two'], 1),
+            'team_one_average_score_against': round(team_one_averages['avg_game_mode_score_team_one_against'], 1),
+            'team_two_average_score_against': round(team_two_averages['avg_game_mode_score_team_two_against'], 1),
             'team_one_average_kd': round(team_one_kd, 2),
             'team_two_average_kd': round(team_two_kd, 2),
             **league_average_data
