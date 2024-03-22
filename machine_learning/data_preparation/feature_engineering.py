@@ -46,7 +46,7 @@ def feature_engineering_team_data(df):
 
     }, inplace=True)
 
-    df.drop(['team', 'team_score', 'opponent', 'opponent_score'], axis=1, inplace=True)
+    df.drop(['team', 'team_score', 'opponent', 'opponent_score', 'total_kills', 'total_deaths'], axis=1, inplace=True)
 
     df = df.merge(team_performance_df, left_on=['team_two', 'date', 'map_id', 'map_number'],
                   right_on=['team', 'date', 'map_id', 'map_number'], how='left')
@@ -57,8 +57,7 @@ def feature_engineering_team_data(df):
         'avg_map_game_mode_score_against': 'avg_map_game_mode_score_team_two_against',
 
     }, inplace=True)
-    df.drop(['team', 'team_score', 'opponent', 'opponent_score'], axis=1, inplace=True)
-
+    df.drop(['team', 'team_score', 'opponent', 'opponent_score', 'total_kills', 'total_deaths'], axis=1, inplace=True)
     return df
 
     # df['avg_game_mode_score_team_one'] = df.apply(
@@ -81,16 +80,43 @@ def feature_engineering_team_data(df):
 
 def get_team_performance_df(df):
     # Split the DataFrame into two based on team one and team two
-    team_one_df = df[
-        ['date', 'map_id', 'map_number', 'team_one', 'team_one_score', 'team_two', 'team_two_score']].copy()
-    team_two_df = df[
-        ['date', 'map_id', 'map_number', 'team_two', 'team_two_score', 'team_one', 'team_one_score']].copy()
+    team_one_df = df.copy()
+    team_two_df = df.copy()
+
+    team_one_df['team_one_total_kills'] = team_one_df[['team_one_player_one_kills', 'team_one_player_two_kills', 'team_one_player_three_kills', 'team_one_player_four_kills']].sum(axis=1)
+    team_one_df['team_one_total_deaths'] = team_one_df[['team_one_player_one_deaths', 'team_one_player_two_deaths', 'team_one_player_three_deaths','team_one_player_four_deaths']].sum(axis=1)
+    team_one_df = team_one_df[
+        ['date',
+         'map_id',
+         'map_number',
+         'team_one',
+         'team_one_score',
+         'team_two',
+         'team_two_score',
+         'team_one_total_kills',
+         'team_one_total_deaths',
+         ]]
+
+    team_two_df['team_two_total_kills'] = team_two_df[['team_two_player_one_kills', 'team_two_player_two_kills', 'team_two_player_three_kills', 'team_two_player_four_kills']].sum(axis=1)
+    team_two_df['team_two_total_deaths'] = team_two_df[['team_two_player_one_deaths', 'team_two_player_two_deaths', 'team_two_player_three_deaths', 'team_two_player_four_deaths']].sum(axis=1)
+
+    team_two_df = team_two_df[
+        ['date',
+         'map_id',
+         'map_number',
+         'team_two',
+         'team_two_score',
+         'team_one',
+         'team_one_score',
+         'team_two_total_kills',
+         'team_two_total_deaths',
+         ]]
 
     # Rename columns so they match
     team_one_df.rename(columns={'team_one': 'team', 'team_two': 'opponent', 'team_one_score': 'team_score',
-                                'team_two_score': 'opponent_score'}, inplace=True)
+                                'team_two_score': 'opponent_score', 'team_one_total_kills': 'total_kills', 'team_one_total_deaths': 'total_deaths'}, inplace=True)
     team_two_df.rename(columns={'team_two': 'team', 'team_one': 'opponent', 'team_two_score': 'team_score',
-                                'team_one_score': 'opponent_score'}, inplace=True)
+                                'team_one_score': 'opponent_score', 'team_two_total_kills': 'total_kills', 'team_two_total_deaths': 'total_deaths'}, inplace=True)
 
     # Concatenate the two DataFrames into a single DataFrame
     performance_df = pd.concat([team_one_df, team_two_df], ignore_index=True)

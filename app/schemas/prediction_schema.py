@@ -20,4 +20,13 @@ class PredictionResponseSchema(Schema):
     team_two_prediction = fields.Integer()
     team_one_player_predictions = fields.Dict(keys=fields.Str(), values=fields.Nested(PlayerAveragesSchema()))
     team_two_player_predictions = fields.Dict(keys=fields.Str(), values=fields.Nested(PlayerAveragesSchema()))
+    team_one_average_score = fields.Integer()
+    team_two_average_score = fields.Integer()
+    team_one_average_score_against = fields.Integer()
+    team_two_average_score_against = fields.Integer()
+    team_one_average_kd = fields.Float()
+    team_two_average_kd = fields.Float()
+    league_average_score = fields.Integer()
+    league_average_kd = fields.Float()
+
 

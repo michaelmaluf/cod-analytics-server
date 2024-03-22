@@ -1,4 +1,5 @@
 from datetime import datetime
+import math
 
 from sqlalchemy.sql import text
 import pandas as pd
@@ -7,7 +8,7 @@ from .model_service import ModelService
 from .roster_service import RosterService
 from .map_game_mode_service import MapGameModeService
 from database.models import Team, PlayerTeamStatus, Player, GameMode, Map
-from machine_learning.data_preparation import fetch_data_for_predictions, get_team_performance_df, \
+from machine_learning.data_preparation import fetch_data, fetch_data_for_predictions, get_team_performance_df, \
     get_player_performance_df, scale_predictions
 from app.enums import GameModeType, Stage
 from app import const
@@ -34,8 +35,8 @@ class PredictionService:
             predictions = self.ModelService.ControlModel.predict(prediction_df)
             scaled_predictions = scale_predictions(predictions, const.CONTROL_TARGET_SCORE)
 
-        prediction_response['team_one_prediction'] = scaled_predictions[0, 0]
-        prediction_response['team_two_prediction'] = scaled_predictions[0, 1]
+        prediction_response['team_one_prediction'] = math.floor(scaled_predictions[0, 0])
+        prediction_response['team_two_prediction'] = math.floor(scaled_predictions[0, 1])
 
         return prediction_response
 
@@ -58,17 +59,20 @@ class PredictionService:
         team_one_players = self.RosterService.find_active_players_on_team(team_one)
         team_two_players = self.RosterService.find_active_players_on_team(team_two)
 
-        df = fetch_data_for_predictions(game_mode, self.session, team_one.id, team_two.id)
+        df = fetch_data(game_mode, self.session)
+        # df = fetch_data_for_predictions(game_mode, self.session, team_one.id, team_two.id)
         team_df = get_team_performance_df(df)
         player_df = get_player_performance_df(df)
 
-        team_one_averages = self.compute_team_averages('team_one', map_id, team_df, team_one.id)
-        team_two_averages = self.compute_team_averages('team_two', map_id, team_df, team_two.id)
+        team_one_averages, team_one_kd = self.compute_team_averages('team_one', map_id, team_df, team_one.id)
+        team_two_averages, team_two_kd = self.compute_team_averages('team_two', map_id, team_df, team_two.id)
 
         team_one_player_averages, team_one_player_averages_to_return = \
             self.compute_player_averages('team_one', map_id, player_df, team_one_players)
         team_two_player_averages, team_two_player_averages_to_return = \
             self.compute_player_averages('team_two', map_id, player_df, team_two_players)
+
+        league_average_data = self.compute_league_average_data(team_df, player_df)
 
         team_and_player_data = {
             'team_one': team_one.id,
@@ -79,12 +83,19 @@ class PredictionService:
             **team_two_player_averages
         }
 
-        player_averages_to_return = {
+        prediction_response = {
             'team_one_player_predictions': team_one_player_averages_to_return,
             'team_two_player_predictions': team_two_player_averages_to_return,
+            'team_one_average_score': round(team_one_averages['avg_game_mode_score_team_one']),
+            'team_two_average_score': round(team_two_averages['avg_game_mode_score_team_two']),
+            'team_one_average_score_against': round(team_one_averages['avg_game_mode_score_team_one_against']),
+            'team_two_average_score_against': round(team_two_averages['avg_game_mode_score_team_two_against']),
+            'team_one_average_kd': round(team_one_kd, 2),
+            'team_two_average_kd': round(team_two_kd, 2),
+            **league_average_data
         }
 
-        return team_and_player_data, player_averages_to_return
+        return team_and_player_data, prediction_response
 
     def compute_team_averages(self, team_number, map_id, team_df, team_id):
         team_averages = {}
@@ -97,7 +108,9 @@ class PredictionService:
         team_averages[f'avg_map_game_mode_score_{team_number}'] = df_with_map_id['team_score'].mean()
         team_averages[f'avg_map_game_mode_score_{team_number}_against'] = df_with_map_id['opponent_score'].mean()
 
-        return team_averages
+        team_average_kd = df_all_maps['total_kills'].sum() / df_all_maps['total_deaths'].sum()
+
+        return team_averages, team_average_kd
 
     def compute_player_averages(self, team_number, map_id, player_df, players):
         player_averages = {}
@@ -161,3 +174,16 @@ class PredictionService:
             return Stage.MAJOR_2
         else:
             return Stage.MAJOR_1
+
+
+    def compute_league_average_data(self, team_df, player_df):
+        league_avg_dict = {}
+
+        league_avg_dict['league_average_score'] = round(team_df['team_score'].mean())
+        league_avg_dict['league_average_kd'] = round(player_df['kills'].sum() / player_df['deaths'].sum(), 2)
+
+        # player_kills_deaths = player_df.groupby('player_id')[['kills', 'deaths']].sum()
+        # player_kills_deaths['kd'] = player_kills_deaths['kills'] / player_kills_deaths['deaths']
+        # league_avg_dict['league_median_kill_kd'] = player_kills_deaths['kd'].median()
+
+        return league_avg_dict
