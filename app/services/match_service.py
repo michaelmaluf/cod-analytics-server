@@ -27,7 +27,7 @@ class MatchService:
         return match_map
 
     def create_player_data(self, player, raw_player_data, map_game_mode_pair):
-        objective_key = map_game_mode_pair.game_mode.to_objective_key()
+        objective_key = map_game_mode_pair.game_mode.name.to_objective_key()
 
         player_data_kwargs = {
             'player': player,

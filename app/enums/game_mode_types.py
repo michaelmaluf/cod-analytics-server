@@ -13,10 +13,10 @@ class GameModeType(Enum):
                 return mode
         return None
 
-    def to_objective_key(game_mode_type):
-        if game_mode_type.name == GameModeType.HARDPOINT:
+    def to_objective_key(self):
+        if self == GameModeType.HARDPOINT:
             return 'hill_time'
-        elif game_mode_type.name == GameModeType.SEARCH_AND_DESTROY:
+        elif self == GameModeType.SEARCH_AND_DESTROY:
             return 'first_bloods'
         else:
             return 'captures'
