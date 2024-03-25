@@ -4,7 +4,6 @@ from datetime import datetime
 from sklearn.pipeline import Pipeline
 from sklearn.model_selection import TimeSeriesSplit, GridSearchCV
 from sklearn.metrics import make_scorer
-import numpy as np
 import pandas as pd
 import joblib
 
@@ -16,7 +15,7 @@ from app import create_app, db
 from machine_learning.transformers import preprocessor
 from machine_learning.ml_models import CODModel
 import machine_learning.const as const
-from database.models import MLModel, GameMode
+from app.database.models import MLModel, GameMode
 
 
 def prepare_data(df):

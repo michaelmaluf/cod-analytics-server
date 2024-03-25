@@ -1,13 +1,11 @@
 from datetime import datetime
 import math
 
-from sqlalchemy.sql import text
 import pandas as pd
 
 from .model_service import ModelService
 from .roster_service import RosterService
 from .map_game_mode_service import MapGameModeService
-from database.models import Team, PlayerTeamStatus, Player, GameMode, Map
 from machine_learning.data_preparation import fetch_data, fetch_data_for_predictions, get_team_performance_df, \
     get_player_performance_df, scale_predictions
 from app.enums import GameModeType, Stage

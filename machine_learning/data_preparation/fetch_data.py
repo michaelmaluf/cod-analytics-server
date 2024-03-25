@@ -6,8 +6,7 @@ import copy
 
 import pandas as pd
 from sqlalchemy import or_
-
-from database.models import Match
+from app.database.models import Match
 from app.enums import GameModeType
 
 # create 3 df objects, one for each game mode

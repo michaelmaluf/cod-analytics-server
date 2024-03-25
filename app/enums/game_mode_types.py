@@ -1,5 +1,5 @@
 from enum import Enum
-from app.errors import GameModeNotFoundError
+
 
 class GameModeType(Enum):
     HARDPOINT = 'Hardpoint'

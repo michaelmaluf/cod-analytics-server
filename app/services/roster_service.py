@@ -1,6 +1,4 @@
-from database.models import Team
-from database.models import Player
-from database.models import PlayerTeamStatus
+from app.database.models import Team, Player, PlayerTeamStatus
 
 class RosterService:
     def __init__(self, session):

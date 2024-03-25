@@ -1,4 +1,4 @@
-from marshmallow import Schema, fields, ValidationError
+from marshmallow import fields, ValidationError
 
 class EnumField(fields.Field):
     def __init__(self, enum, *args, **kwargs):

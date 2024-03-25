@@ -3,7 +3,7 @@ import uuid
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import backref
 
-from database import db
+from app.database import db
 
 class Team(db.Model):
     __tablename__ = 'teams'

@@ -4,7 +4,7 @@ from sqlalchemy import Column, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
-from database import db
+from app.database import db
 
 class Player(db.Model):
     __tablename__ = 'players'

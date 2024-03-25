@@ -3,7 +3,7 @@ from datetime import datetime
 
 from sqlalchemy.dialects.postgresql import UUID, JSONB
 
-from database import db
+from app.database import db
 
 class MLModel(db.Model):
     __tablename__ = 'ml_models'

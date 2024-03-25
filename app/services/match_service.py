@@ -1,7 +1,5 @@
-from database.models import Match
+from app.database.models import Match, MatchMap, PlayerData
 from app.schemas import MatchSchema
-from database.models.match_map import MatchMap
-from database.models import PlayerData
 
 
 class MatchService:

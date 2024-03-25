@@ -1,6 +1,6 @@
-from database.models.map_game_mode import GameMode
+from app.database.models.map_game_mode import GameMode
 from app.enums import GameModeType
-from database import db
+from app.database import db
 
 
 def prepopulate_db():

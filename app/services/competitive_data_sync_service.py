@@ -1,7 +1,8 @@
-
 from .match_service import MatchService
 from .roster_service import RosterService
 from .map_game_mode_service import MapGameModeService
+from app.scraper import fetch_match_and_player_data
+
 
 class CompetitiveDataSyncService:
     def __init__(self, session):
@@ -10,7 +11,8 @@ class CompetitiveDataSyncService:
         self.RosterService = RosterService(session)
         self.MapGameModeService = MapGameModeService(session)
 
-    def populate_all_data(self, scraped_data):
+    def populate_all_data(self):
+        scraped_data = fetch_match_and_player_data()
         for data in scraped_data:
             team_one, team_two = self.RosterService.get_or_create_teams(data)
             match = self.MatchService.create_match(team_one, team_two, data)

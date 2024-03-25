@@ -2,7 +2,7 @@ import uuid
 
 from sqlalchemy.dialects.postgresql import UUID
 
-from database import db
+from app.database import db
 from app.enums import GameModeType
 
 class MapGameModePair(db.Model):

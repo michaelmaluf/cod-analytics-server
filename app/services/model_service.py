@@ -3,11 +3,8 @@ from io import BytesIO
 
 from sqlalchemy import desc
 
-from database.models import MLModel, GameMode
+from app.database.models import MLModel, GameMode
 from app.enums import GameModeType
-
-
-# use pickle to serialize and deserailize models.
 
 
 class ModelService:
