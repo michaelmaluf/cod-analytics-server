@@ -9,10 +9,10 @@ class PredictionRequestSchema(Schema):
 
 
 class PlayerAveragesSchema(Schema):
-    kills = fields.Integer()
-    deaths = fields.Integer()
+    kills = fields.Float()
+    deaths = fields.Float()
     damage = fields.Integer()
-    objectives = fields.Integer()
+    objectives = fields.Float()
 
 
 class PredictionResponseSchema(Schema):

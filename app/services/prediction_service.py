@@ -149,10 +149,10 @@ class PredictionService:
             }
 
             player_avg_to_return = {
-                'kills': round(avg_game_mode_kills),
-                'deaths': round(avg_game_mode_deaths),
+                'kills': round(avg_game_mode_kills, 1),
+                'deaths': round(avg_game_mode_deaths, 1),
                 'damage': round(avg_game_mode_damage),
-                'objectives': round(avg_game_mode_objectives),
+                'objectives': round(avg_game_mode_objectives, 1),
             }
 
             player_averages.update(player_avg)
@@ -179,7 +179,7 @@ class PredictionService:
     def compute_league_average_data(self, team_df, player_df):
         league_avg_dict = {}
 
-        league_avg_dict['league_average_score'] = round(team_df['team_score'].mean())
+        league_avg_dict['league_average_score'] = round(team_df['team_score'].mean(), 1)
         league_avg_dict['league_average_kd'] = round(player_df['kills'].sum() / player_df['deaths'].sum(), 2)
 
         # player_kills_deaths = player_df.groupby('player_id')[['kills', 'deaths']].sum()
