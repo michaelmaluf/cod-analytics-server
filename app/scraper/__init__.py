@@ -1,0 +1,1 @@
+from .data_scraper import fetch_match_and_player_data

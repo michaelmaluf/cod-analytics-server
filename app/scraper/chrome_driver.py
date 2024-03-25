@@ -1,10 +1,9 @@
-from datetime import date, datetime
-from typing import List, Dict, Tuple, Optional
+from datetime import datetime
+from typing import List
 import time
 import os
 
 from selenium import webdriver
-from selenium.common import NoSuchElementException
 from selenium.webdriver.common.by import By
 import app.const as const
 

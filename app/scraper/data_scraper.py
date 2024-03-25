@@ -2,12 +2,10 @@ from datetime import datetime
 
 from .chrome_driver import ChromeDriver
 from app import db
-from database.models import Match
+from app.database.models import Match
 import app.const as const
 
 from bs4 import BeautifulSoup
-
-chrome_driver = ChromeDriver()
 
 
 def get_most_recent_match_date():
@@ -125,7 +123,7 @@ def parse_match_maps(match_maps_overview_div, player_data_by_match_map_divs):
     return match_maps
 
 
-def parse_match_data(match_url):
+def parse_match_data(chrome_driver, match_url):
     match_page_source = chrome_driver.fetch_match_page_source(match_url)
     soup = BeautifulSoup(match_page_source, 'html.parser')
 
@@ -146,12 +144,13 @@ def parse_match_data(match_url):
 
 
 def fetch_match_and_player_data():
+    chrome_driver = ChromeDriver()
     last_match_date = get_most_recent_match_date()
     match_urls = chrome_driver.fetch_match_urls_from_last_match_date(last_match_date)
     match_and_player_data = []
 
     for match_url in match_urls:
-        match_and_player_data.append(parse_match_data(match_url))
+        match_and_player_data.append(parse_match_data(chrome_driver, match_url))
 
     chrome_driver.exit_driver()
     return match_and_player_data
