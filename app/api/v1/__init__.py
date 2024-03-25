@@ -1,1 +1,1 @@
-from .routes import predictions_bp
+from .routes import predictions_bp, scraper_bp
