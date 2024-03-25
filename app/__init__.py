@@ -1,11 +1,11 @@
 import os
 
 from flask import Flask
+from flask_smorest import Api
+from flask_cors import CORS
 
 from app.config import DevConfig, ProdConfig
-from database import db
-# from database.models import register_models
-from database.models import *
+from app.database import db
 
 env_config = {
     'development': DevConfig,
@@ -14,17 +14,24 @@ env_config = {
 
 def create_app():
     app = Flask(__name__)
+    CORS(app)
 
     config_class = env_config.get(os.getenv('FLASK_ENV', 'development'))
     app.config.from_object(config_class)
     db.init_app(app)
 
+    api = Api(app)
+
     with app.app_context():
+        from app.services import PredictionService, CompetitiveDataSyncService
         # register_models()
         # db.drop_all()
         db.create_all()
+        app.prediction_service = PredictionService(session=db.session)
+        app.competitive_data_sync_service = CompetitiveDataSyncService(session=db.session)
 
-    from app.api import scraper_bp
-    app.register_blueprint(scraper_bp)
+    from app.api import scraper_bp, predictions_bp
+    api.register_blueprint(scraper_bp)
+    api.register_blueprint(predictions_bp)
 
     return app
