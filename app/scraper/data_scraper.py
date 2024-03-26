@@ -127,7 +127,7 @@ def parse_match_data(chrome_driver, match_url):
     match_page_source = chrome_driver.fetch_match_page_source(match_url)
     soup = BeautifulSoup(match_page_source, 'html.parser')
 
-    match_date = soup.find('div', class_='mantine-7c77qh').text
+    match_date = soup.find('div', class_='mantine-2efw47').text
     match_metadata_div = soup.find('div', class_='mantine-l3a1ir')
     match_overview_div = soup.find('div', class_='mantine-1a5yjft')
     match_maps_overview_div = soup.find('div', class_='mantine-g92whd')
@@ -149,7 +149,7 @@ def fetch_match_and_player_data():
     match_urls = chrome_driver.fetch_match_urls_from_last_match_date(last_match_date)
     match_and_player_data = []
 
-    for match_url in match_urls:
+    for match_url in match_urls[:1]:
         match_and_player_data.append(parse_match_data(chrome_driver, match_url))
 
     chrome_driver.exit_driver()
