@@ -118,9 +118,25 @@ class PredictionService:
         # Group by 'player_id' for overall averages
         overall_averages = player_df.groupby('player_id')[['kills', 'deaths', 'damage', 'objectives']].mean()
 
-        # Group by both 'player_id' and 'map_id' for map-specific averages
-        map_specific_averages = player_df[player_df['map_id'] == map_id].groupby('player_id')[
-            ['kills', 'deaths', 'damage', 'objectives']].mean()
+        # Map specific averages
+        map_specific_df = player_df[player_df['map_id'] == map_id]
+        map_specific_averages = map_specific_df.groupby('player_id')[['kills', 'deaths', 'damage', 'objectives']].mean()
+        map_specific_averages['entries'] = map_specific_df.groupby('player_id').size()
+
+        # Bayesian averages that are used only for the prediction returns to the user interface, models are either
+        # trained on both game mode and map specific averages whereas the return averages to the user are weighted
+        # averages of these
+        C = player_df.groupby('player_id').size()
+        for metric in ['kills', 'deaths', 'damage', 'objectives']:
+            M = overall_averages[metric]  # Prior: player's overall average for the metric
+            T = map_specific_averages['entries'] * 2  # Weighted number of entries for the player on the specific map
+            S = map_specific_averages[metric]  # Actual average for the player on the specific map
+
+            # Bayesian Average Calculation
+            bayesian_metric = f'bayesian_{metric}'
+            map_specific_averages[bayesian_metric] = (C * M + T * S) / (C + T)
+
+
 
         for player_status, player_number in zip(players, player_numbers):
             player_id = player_status.player_id
@@ -147,10 +163,10 @@ class PredictionService:
             }
 
             player_avg_to_return = {
-                'kills': round(avg_game_mode_kills, 1),
-                'deaths': round(avg_game_mode_deaths, 1),
-                'damage': round(avg_game_mode_damage),
-                'objectives': round(avg_game_mode_objectives, 1),
+                'kills': round(map_specific_averages.at[player_id, 'bayesian_kills'] if player_id in map_specific_averages.index else avg_game_mode_kills, 1),
+                'deaths': round(map_specific_averages.at[player_id, 'bayesian_deaths'] if player_id in map_specific_averages.index else avg_game_mode_deaths, 1),
+                'damage': round(map_specific_averages.at[player_id, 'bayesian_damage'] if player_id in map_specific_averages.index else avg_game_mode_damage, 1),
+                'objectives': round(map_specific_averages.at[player_id, 'bayesian_objectives'] if player_id in map_specific_averages.index else avg_game_mode_objectives, 1),
             }
 
             player_averages.update(player_avg)
