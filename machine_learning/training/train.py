@@ -10,7 +10,6 @@ import joblib
 from machine_learning.data_preparation import fetch_data, clean_data, separate_features_and_labels, feature_engineering, \
     data_augmentation, drop_columns, scale_predictions, custom_model_evaluation, custom_evaluation_wrapper, display_features_importances
 from app.enums import GameModeType
-from app import create_app, db
 
 from machine_learning.transformers import preprocessor
 from machine_learning.ml_models import CODModel
@@ -30,7 +29,7 @@ def prepare_data(df):
     return X, y
 
 
-def save_model_to_db(game_mode, hyperparameters, model_pipeline):
+def save_model_to_db(game_mode, hyperparameters, model_pipeline, db_session):
     model_buffer = BytesIO()
     joblib.dump(model_pipeline, model_buffer)
     model_bytes = model_buffer.getvalue()
@@ -40,16 +39,14 @@ def save_model_to_db(game_mode, hyperparameters, model_pipeline):
         model_data=model_bytes
     )
 
-    with app.app_context():
-        new_ml_model.game_mode = db.session.query(GameMode).filter_by(name=game_mode).first()
-        db.session.add(new_ml_model)
-        db.session.commit()
-        db.session.close()
+    new_ml_model.game_mode = db_session.query(GameMode).filter_by(name=game_mode).first()
+    db_session.add(new_ml_model)
+    db_session.commit()
+    db_session.close()
 
 
-def train_game_mode_model(game_mode, app):
-    with app.app_context():
-        game_mode_data = fetch_data(game_mode, db.session)
+def train_game_mode_model(game_mode, db_session):
+    game_mode_data = fetch_data(game_mode, db_session)
 
     X, y = prepare_data(game_mode_data)
     hyperparams = getattr(const, f'{game_mode.name}_HYPERPARAMS')
@@ -88,14 +85,13 @@ def train_game_mode_model(game_mode, app):
                   f'Evaluation score: {evaluation_score}'
         file.write(results)
 
-    save_model_to_db(game_mode, hyperparams, game_mode_pipeline)
+    save_model_to_db(game_mode, hyperparams, game_mode_pipeline, db_session)
 
     display_features_importances(game_mode_pipeline, X)
 
 
-def perform_grid_search(game_mode, app):
-    with app.app_context():
-        game_mode_data = fetch_data(game_mode, db.session)
+def perform_grid_search(game_mode, db_session):
+    game_mode_data = fetch_data(game_mode, db_session)
 
     X, y = prepare_data(game_mode_data)
     game_mode_model = CODModel()
@@ -120,19 +116,13 @@ def perform_grid_search(game_mode, app):
         file.write(results)
 
 
-def train_all_models(app):
-    train_game_mode_model(GameModeType.HARDPOINT, app)
-    train_game_mode_model(GameModeType.SEARCH_AND_DESTROY, app)
-    train_game_mode_model(GameModeType.CONTROL, app)
+def train_all_models(db_session):
+    train_game_mode_model(GameModeType.HARDPOINT, db_session)
+    train_game_mode_model(GameModeType.SEARCH_AND_DESTROY, db_session)
+    train_game_mode_model(GameModeType.CONTROL, db_session)
 
 
-def perform_grid_search_all_models(app):
-    perform_grid_search(GameModeType.HARDPOINT, app)
-    perform_grid_search(GameModeType.SEARCH_AND_DESTROY, app)
-    perform_grid_search(GameModeType.CONTROL, app)
-
-
-if __name__ == '__main__':
-    app = create_app()
-    train_all_models(app)
-    # perform_grid_search_all_models(app)
+def perform_grid_search_all_models(db_session):
+    perform_grid_search(GameModeType.HARDPOINT, db_session)
+    perform_grid_search(GameModeType.SEARCH_AND_DESTROY, db_session)
+    perform_grid_search(GameModeType.CONTROL, db_session)
