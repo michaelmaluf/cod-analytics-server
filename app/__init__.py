@@ -3,9 +3,11 @@ import os
 from flask import Flask
 from flask_smorest import Api
 from flask_cors import CORS
+from dotenv import load_dotenv
+load_dotenv()
 
 from app.config import DevConfig, ProdConfig
-from app.database import db
+from app.database import db, prepopulate_db
 
 env_config = {
     'development': DevConfig,
@@ -24,9 +26,8 @@ def create_app():
 
     with app.app_context():
         from app.services import PredictionService, CompetitiveDataSyncService
-        # register_models()
-        # db.drop_all()
         db.create_all()
+        prepopulate_db()
         app.prediction_service = PredictionService(session=db.session)
         app.competitive_data_sync_service = CompetitiveDataSyncService(session=db.session)
 
