@@ -32,4 +32,4 @@ def scrape():
     """
     current_app.competitive_data_sync_service.populate_all_data()
     train_all_models(db.session)
-    return 'Scraper successfully ran, db updated with new data, ML models updated to reflect new data', 204
+    return 'Scraper successfully ran, db updated with new data, ML models updated to reflect new data', 200

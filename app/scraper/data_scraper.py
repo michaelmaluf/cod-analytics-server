@@ -12,7 +12,7 @@ def get_most_recent_match_date():
     most_recent_match_date = db.session.query(db.func.max(Match.date)).scalar()
 
     if not most_recent_match_date:
-        most_recent_match_date = datetime.strptime(const.CDL_FIRST_MATCH_DATE, '%Y-%m-%d').date()
+        most_recent_match_date = datetime.strptime(const.CDL_FIRST_MATCH_DATE, '%Y-%m-%d')
 
     return most_recent_match_date
 
@@ -149,7 +149,7 @@ def fetch_match_and_player_data():
     match_urls = chrome_driver.fetch_match_urls_from_last_match_date(last_match_date)
     match_and_player_data = []
 
-    for match_url in match_urls[:1]:
+    for match_url in match_urls:
         match_and_player_data.append(parse_match_data(chrome_driver, match_url))
 
     chrome_driver.exit_driver()
