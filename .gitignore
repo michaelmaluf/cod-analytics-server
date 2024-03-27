@@ -60,4 +60,4 @@ docs/_build/
 # pipenv
 Pipfile.lock
 
-
+stats.txt

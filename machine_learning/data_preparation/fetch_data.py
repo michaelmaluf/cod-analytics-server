@@ -6,8 +6,11 @@ import copy
 
 import pandas as pd
 from sqlalchemy import or_
-from app.database.models import Match
+from sqlalchemy.orm import selectinload
+
+from app.database.models import Match, MatchMap
 from app.enums import GameModeType
+
 
 # create 3 df objects, one for each game mode
 
@@ -45,11 +48,13 @@ def fetch_player_data_from_match_map(game_mode, player_data_for_match_map):
             player_data[f'{team}_{player}_kills'] = player_data_for_match_map[player_idx].kills
             player_data[f'{team}_{player}_deaths'] = player_data_for_match_map[player_idx].deaths
             player_data[f'{team}_{player}_damage'] = player_data_for_match_map[player_idx].damage
-            player_data[f'{team}_{player}_objectives'] = fetch_player_obj_for_match_map(game_mode, player_idx, player_data_for_match_map)
+            player_data[f'{team}_{player}_objectives'] = fetch_player_obj_for_match_map(game_mode, player_idx,
+                                                                                        player_data_for_match_map)
 
             player_idx += 1
 
     return player_data
+
 
 def fetch_player_obj_for_match_map(game_mode, player_idx, player_data_for_match_map):
     if game_mode == GameModeType.HARDPOINT:
@@ -59,8 +64,11 @@ def fetch_player_obj_for_match_map(game_mode, player_idx, player_data_for_match_
     else:
         return player_data_for_match_map[player_idx].captures
 
+
 def fetch_data(game_mode, db_session):
-    matches = db_session.query(Match).all()
+    matches = db_session.query(Match).options(
+        selectinload(Match.match_maps).selectinload(MatchMap.player_data)
+    ).all()
     match_data_dicts = []
     for match in matches:
         match_data = fetch_match_data_from_match(game_mode, match)
