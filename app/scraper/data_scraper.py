@@ -148,8 +148,8 @@ def fetch_match_and_player_data():
     last_match_date = get_most_recent_match_date()
     match_urls = chrome_driver.fetch_match_urls_from_last_match_date(last_match_date)
     match_and_player_data = []
-
-    for match_url in match_urls:
+    # iterate over matches in chronological order from oldest to newest
+    for match_url in match_urls[::-1]:
         match_and_player_data.append(parse_match_data(chrome_driver, match_url))
 
     chrome_driver.exit_driver()
