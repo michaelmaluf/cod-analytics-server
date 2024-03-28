@@ -1,4 +1,6 @@
-from flask import current_app
+import os
+
+from flask import current_app, request
 from flask_smorest import Blueprint
 
 from app import db
@@ -33,3 +35,8 @@ def scrape():
     current_app.competitive_data_sync_service.populate_all_data()
     train_all_models(db.session)
     return 'Scraper successfully ran, db updated with new data, ML models updated to reflect new data', 200
+
+@scraper_bp.before_request
+def before_request_func():
+    if request.headers.get('X-API-Key') != os.getenv('X-API-KEY'):
+        return 'Unauthorized Access', 401
