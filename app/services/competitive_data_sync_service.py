@@ -1,7 +1,13 @@
+from decimal import Decimal
+
+import pandas as pd
+
 from .match_service import MatchService
 from .roster_service import RosterService
 from .map_game_mode_service import MapGameModeService
 from app.scraper import fetch_match_and_player_data
+from app.enums import GameModeType
+from app.database.models import PlayerTeamStatus, Player
 
 
 class CompetitiveDataSyncService:
@@ -54,3 +60,56 @@ class CompetitiveDataSyncService:
 
             self.session.commit()
             self.session.close()
+
+    def update_player_rankings_for_game_modes(self):
+        all_rankings = pd.DataFrame()
+
+        for game_mode in GameModeType:
+            player_averages_df = self.MatchService.get_all_player_averages_for_game_mode(game_mode)
+
+            for index, player in player_averages_df.iterrows():
+                if self.session.query(PlayerTeamStatus).filter_by(player_id=player['player_id'], active=True).count() == 0:
+                    player_averages_df.drop(index, inplace=True)
+
+            players = player_averages_df.iloc[:, [0]]
+            player_averages_df.drop(player_averages_df.columns[0], axis=1, inplace=True)
+
+            player_averages_df['kd_ratio'] = player_averages_df['average_kills'] / player_averages_df['average_deaths']
+            player_averages_df['average_engagements'] = player_averages_df['average_kills'] + player_averages_df['average_deaths']
+            df_normalized = (player_averages_df - player_averages_df.min()) / (player_averages_df.max() - player_averages_df.min())
+
+            players['aggregate_normalized_score'] = self.calculate_aggregate_normalized_scores(df_normalized)
+            players[f'{game_mode.name}_rank'] = players['aggregate_normalized_score'].rank(ascending=False, method='dense').astype(int)
+            players.drop('aggregate_normalized_score', axis=1, inplace=True)
+
+            if all_rankings.empty:
+                all_rankings = players
+            else:
+                all_rankings = pd.merge(all_rankings, players, on='player_id', how='inner')
+
+        for index, row in all_rankings.iterrows():
+            player = self.session.query(Player).filter_by(id=row['player_id']).first()
+            if player:
+                player.hardpoint_rank = row['HARDPOINT_rank']
+                player.search_and_destroy_rank = row['SEARCH_AND_DESTROY_rank']
+                player.control_rank = row['CONTROL_rank']
+
+        self.session.commit()
+        self.session.close()
+
+    def calculate_aggregate_normalized_scores(self, df_normalized):
+        weight_kills = Decimal('0.1')
+        weight_deaths = Decimal('0.1')
+        weight_damage = Decimal('0.2')
+        weight_objectives = Decimal('0.2')
+        weight_kd = Decimal('0.2')
+        weight_engagements = Decimal('0.2')
+
+        aggregate_normalized_scores = df_normalized['average_kills'] * weight_kills - \
+                                      df_normalized['average_deaths'] * weight_deaths + \
+                                      df_normalized['average_damage'] * weight_damage + \
+                                      df_normalized['average_objectives'] * weight_objectives + \
+                                      df_normalized['kd_ratio'] * weight_kd + \
+                                      df_normalized['average_engagements'] * weight_engagements
+
+        return aggregate_normalized_scores
