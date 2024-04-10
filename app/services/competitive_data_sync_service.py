@@ -1,5 +1,3 @@
-from decimal import Decimal
-
 import pandas as pd
 
 from .match_service import MatchService
@@ -8,6 +6,7 @@ from .map_game_mode_service import MapGameModeService
 from app.scraper import fetch_match_and_player_data
 from app.enums import GameModeType
 from app.database.models import PlayerTeamStatus, Player
+import app.const as const
 
 
 class CompetitiveDataSyncService:
@@ -78,7 +77,7 @@ class CompetitiveDataSyncService:
             player_averages_df['average_engagements'] = player_averages_df['average_kills'] + player_averages_df['average_deaths']
             df_normalized = (player_averages_df - player_averages_df.min()) / (player_averages_df.max() - player_averages_df.min())
 
-            players['aggregate_normalized_score'] = self.calculate_aggregate_normalized_scores(df_normalized)
+            players['aggregate_normalized_score'] = self.calculate_aggregate_normalized_scores(df_normalized, game_mode)
             players[f'{game_mode.name}_rank'] = players['aggregate_normalized_score'].rank(ascending=False, method='dense').astype(int)
             players.drop('aggregate_normalized_score', axis=1, inplace=True)
 
@@ -97,19 +96,14 @@ class CompetitiveDataSyncService:
         self.session.commit()
         self.session.close()
 
-    def calculate_aggregate_normalized_scores(self, df_normalized):
-        weight_kills = Decimal('0.1')
-        weight_deaths = Decimal('0.1')
-        weight_damage = Decimal('0.2')
-        weight_objectives = Decimal('0.2')
-        weight_kd = Decimal('0.2')
-        weight_engagements = Decimal('0.2')
+    def calculate_aggregate_normalized_scores(self, df_normalized, game_mode):
+        weights = const.WEIGHTS_PER_GAME_MODE[game_mode.value]
 
-        aggregate_normalized_scores = df_normalized['average_kills'] * weight_kills - \
-                                      df_normalized['average_deaths'] * weight_deaths + \
-                                      df_normalized['average_damage'] * weight_damage + \
-                                      df_normalized['average_objectives'] * weight_objectives + \
-                                      df_normalized['kd_ratio'] * weight_kd + \
-                                      df_normalized['average_engagements'] * weight_engagements
+        aggregate_normalized_scores = df_normalized['average_kills'] * weights['kills'] - \
+                                      df_normalized['average_deaths'] * weights['deaths'] + \
+                                      df_normalized['average_damage'] * weights['damage'] + \
+                                      df_normalized['average_objectives'] * weights['objectives'] + \
+                                      df_normalized['kd_ratio'] * weights['kd'] + \
+                                      df_normalized['average_engagements'] * weights['engagements']
 
         return aggregate_normalized_scores
