@@ -69,3 +69,25 @@ class RosterService:
 
     def find_active_players_on_team(self, team):
         return self.session.query(PlayerTeamStatus).filter_by(team=team, active=True).all()
+
+    def find_player_names_by_team_name(self, team_name):
+        team = self.find_team_by_team_name(team_name)
+        active_players_on_team = self.find_active_players_on_team(team)
+        return [active_player.player.name for active_player in active_players_on_team]
+
+    def get_all_rosters(self):
+        all_teams = self.session.query(Team).all()
+        rosters = {}
+
+        for team in all_teams:
+            rosters[team.name] = []
+            active_players = [player_status.player for player_status in team.player_statuses if player_status.active]
+            for player in active_players:
+                rosters[team.name].append({
+                    'name': player.name,
+                    'hardpoint_rank': player.hardpoint_rank,
+                    'search_and_destroy_rank': player.search_and_destroy_rank,
+                    'control_rank': player.control_rank,
+                })
+
+        return rosters
