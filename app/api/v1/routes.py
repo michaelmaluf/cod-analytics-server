@@ -58,12 +58,12 @@ def scrape():
     """
     Calls the data scraper to fetch new data and populate the database with the new data made available.
     """
-    # current_app.competitive_data_sync_service.populate_all_data()
+    current_app.competitive_data_sync_service.populate_all_data()
     current_app.competitive_data_sync_service.update_player_rankings_for_game_modes()
-    # train_all_models(db.session)
+    train_all_models(db.session)
     return 'Scraper successfully ran, db updated with new data, ML models updated to reflect new data', 200
 
 @scraper_bp.before_request
 def before_request_func():
-    if request.headers.get('X-API-Key') != os.getenv('X-API-KEY'):
+    if request.headers.get('X_API_KEY') != os.getenv('X_API_KEY'):
         return 'Unauthorized Access', 401
