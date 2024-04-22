@@ -64,7 +64,7 @@ def parse_match_overview(match_overview_div):
     match_overview = {}
 
     team_names = match_overview_div.find_all('div', class_='mantine-14yjo12')
-    match_results = match_overview_div.find('div', class_='mantine-1uguyhf').find_all('div')
+    match_results = match_overview_div.find('div', class_='mantine-1veukit').find_all('div')
 
     match_overview['team_one_name'] = team_names[0].find('a').text
     match_overview['team_one_maps_won'] = int(match_results[0].text)
@@ -129,7 +129,7 @@ def parse_match_data(chrome_driver, match_url):
 
     match_date = soup.find('div', class_='mantine-2efw47').text
     match_metadata_div = soup.find('div', class_='mantine-l3a1ir')
-    match_overview_div = soup.find('div', class_='mantine-1a5yjft')
+    match_overview_div = soup.find('div', class_='mantine-6bcea4')
     match_maps_overview_div = soup.find('div', class_='mantine-g92whd')
     player_data_by_match_map_divs = soup.find_all('div', class_='mantine-v1hkmm')
 

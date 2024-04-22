@@ -65,5 +65,5 @@ def scrape():
 
 @scraper_bp.before_request
 def before_request_func():
-    if request.headers.get('X_API_KEY') != os.getenv('X_API_KEY'):
+    if request.headers.get('X-API-KEY') != os.getenv('X-API-KEY'):
         return 'Unauthorized Access', 401

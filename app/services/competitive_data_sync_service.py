@@ -52,10 +52,14 @@ class CompetitiveDataSyncService:
             for player_team_status in team_one.player_statuses:
                 if player_team_status.active and player_team_status.player_id not in team_one_player_ids:
                     player_team_status.active = False
+                elif not player_team_status.active and player_team_status.player_id in team_one_player_ids:
+                    player_team_status.active = True
 
             for player_team_status in team_two.player_statuses:
                 if player_team_status.active and player_team_status.player_id not in team_two_player_ids:
                     player_team_status.active = False
+                elif not player_team_status.active and player_team_status.player_id in team_two_player_ids:
+                    player_team_status.active = True
 
             self.session.commit()
             self.session.close()
